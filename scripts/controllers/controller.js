@@ -28,13 +28,18 @@ function bindEvents() {
     document.getElementById('UNDO_Button').addEventListener('click', undoButton);   
 }
 
+let flag = false;
 function updateStatus(buttonID) {
+    if(flag) {
+        resetButtons();
+        flag = false;
+    }
     document.getElementById(statusButtons[overCounter % 6]).innerText = correspondingActions[buttonID][0];
     runCountIncrement(buttonID);
     overCountIncrement(buttonID);
     printScore();
     if(overCounter%6 == 0) {
-        resetButtons();
+        flag = true;
     }
 }
 
