@@ -9,23 +9,28 @@ function init() {
 var overCounter = 0;
 var runCounter = 0;
 var wicketCounter = 0;
+var requiredRuns = 0;
+var requiredBalls = 0;
 var statusButtons = ['firstStatusButton', 'secondStatusButton', 'thirdStatusButton', 'fourthStatusButton', 'fifthStatusButton', 'sixthStatusButton'];
 // {button : [render, runIncrement, overIncrement]}
 var correspondingActions = {'DOT_Button' : ['D', 0, 1], 'WIDE_Button' : ['WIDE', 1, 0], 'NO_BALL_Button' : ['NB', 1, 0], '1_Button' : ['1', 1, 1], '2_Button' : ['2', 2, 1], '3_Button' : ['3', 3, 1], '4_Button' : ['4', 4, 1], '6_Button' : ['6', 6, 1], 'WICKET_Button' : ['W', 0, 1]};
 
 function bindEvents() {
-    document.getElementById('DOT_Button').addEventListener('click', dotButton);
-    document.getElementById('WIDE_Button').addEventListener('click', wideButton);
-    document.getElementById('NO_BALL_Button').addEventListener('click', noBallButton);
-    document.getElementById('1_Button').addEventListener('click', oneRunButton);
-    document.getElementById('2_Button').addEventListener('click', twoRunsButton);
-    document.getElementById('3_Button').addEventListener('click', threeRunsButton);
-    document.getElementById('4_Button').addEventListener('click', fourRunsButton);
-    document.getElementById('6_Button').addEventListener('click', sixRunsButton);
-    document.getElementById('WICKET_Button').addEventListener('click', wicketButton);
+    document.getElementById('DOT_Button').addEventListener('click', function() {updateStatus('DOT_Button');});
+    document.getElementById('WIDE_Button').addEventListener('click', function() {updateStatus('WIDE_Button');});
+    document.getElementById('NO_BALL_Button').addEventListener('click', function() {updateStatus('NO_BALL_Button');});
+    document.getElementById('1_Button').addEventListener('click', function() {updateStatus('1_Button');});
+    document.getElementById('2_Button').addEventListener('click', function() {updateStatus('2_Button');});
+    document.getElementById('3_Button').addEventListener('click', function() {updateStatus('3_Button');});
+    document.getElementById('4_Button').addEventListener('click', function() {updateStatus('4_Button');});
+    document.getElementById('6_Button').addEventListener('click', function() {updateStatus('6_Button');});
+    document.getElementById('WICKET_Button').addEventListener('click', function() {updateStatus('WICKET_Button');});
     document.getElementById('Scoreboard_Button').addEventListener('click', scoreboardButton);
     document.getElementById('Target_Mode_Button').addEventListener('click', targetButton);
-    document.getElementById('UNDO_Button').addEventListener('click', undoButton);   
+    document.getElementById('popupTarget').addEventListener('click', closePopup);
+    document.getElementById('submitTarget').addEventListener('click', submitTarget);
+    document.getElementById('closeRequireBox').addEventListener('click', closeRequireBox);
+    document.getElementById('UNDO_Button').addEventListener('click', undoButton);
 }
 
 let flag = false;
@@ -55,15 +60,26 @@ function overCountIncrement(buttonID) {
 }
 
 function printScore() {
-    // print runs/wickets
+    // print runs-wickets
     document.getElementById('runCount').innerText = runCounter + '/' + wicketCounter;
 
     // print overs
     document.getElementById('overCount').innerText = Math.floor(overCounter/6) + '.' + overCounter%6;
+
+    // Update require-box with the values
+    document.getElementById('requiredRuns').innerText = requiredRuns - runCounter;
+    document.getElementById('requiredBalls').innerText = requiredBalls - overCounter;
+
+    if(requiredRuns - runCounter < 0) {
+        document.getElementById('requireStatement').innerText = 'Congratulations !! You Won 🎉🎊';
+    }
+    if(requiredBalls - overCounter < 0) {
+        document.getElementById('requireStatement').innerText = 'Alas !! You Lost 🥹😔';
+    }
+    
 }
 
 function resetButtons() {
-    console.log("Enter in reset button ", overCounter, overCounter%6);
     for(let buttonID of statusButtons) {
         document.getElementById(buttonID).innerText = '';
     }
@@ -73,54 +89,49 @@ function readAllFields() {
 
 }
 
-
-
-
-function dotButton() {
-    updateStatus('DOT_Button');
-    
-    
-}
-
-function wideButton() {
-    updateStatus('WIDE_Button');
-}
-
-function noBallButton() {
-    updateStatus('NO_BALL_Button');
-}
-
-function oneRunButton() {
-    updateStatus('1_Button');
-}
-
-function twoRunsButton() {
-    updateStatus('2_Button');
-}
-
-function threeRunsButton() {
-    updateStatus('3_Button');
-}
-
-function fourRunsButton() {
-    updateStatus('4_Button');
-}
-
-function sixRunsButton() {
-    updateStatus('6_Button');
-}
-
-function wicketButton() {
-    updateStatus('WICKET_Button');
-}
-
 function scoreboardButton() {
 
 }
 
-function targetButton() {
 
+function targetButton() {
+    const popup = document.getElementById('popupTarget');
+    popup.classList.add('active');
 }
+
+function closePopup(event) {
+    // Only close if clicking on the background overlay, not the popup content
+    console.log("close");
+    if (event.target.id === 'popupTarget') {
+        document.getElementById('popupTarget').classList.remove('active');
+    }
+}
+
+function submitTarget() {
+    const runsInput = document.getElementById('runsInput');
+    const oversInput = document.getElementById('oversInput');
+    requiredRuns = parseInt(runsInput.value) || 0;
+    requiredBalls = parseInt(oversInput.value)*6 || 0;
+    document.getElementById('requireBox').style.display = 'flex';
+    printScore();
+    if(requiredRuns - runCounter < 0) {
+        document.getElementById('requireStatement').innerText = 'Congratulations !! You Won 🎉🎊';
+    }
+    if(requiredBalls - overCounter < 0) {
+        document.getElementById('requireStatement').innerText = 'Alas !! You Lost 🥹😔';
+    }
+    document.getElementById('popupTarget').classList.remove('active');
+    
+    // Clear inputs for next use
+    runsInput.value = '';
+    oversInput.value = '';
+}
+
+function closeRequireBox() {
+    document.getElementById("requireBox").style.display = "none";
+}
+
+
 
 function undoButton() {
 
