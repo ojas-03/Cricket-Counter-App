@@ -6,8 +6,12 @@ function init() {
     bindEvents();
 }
 
-var i = 0;
-
+var overCounter = 0;
+var runCounter = 0;
+var wicketCounter = 0;
+var statusButtons = ['firstStatusButton', 'secondStatusButton', 'thirdStatusButton', 'fourthStatusButton', 'fifthStatusButton', 'sixthStatusButton'];
+// {button : [render, runIncrement, overIncrement]}
+var correspondingActions = {'DOT_Button' : ['D', 0, 1], 'WIDE_Button' : ['WIDE', 1, 0], 'NO_BALL_Button' : ['NB', 1, 0], '1_Button' : ['1', 1, 1], '2_Button' : ['2', 2, 1], '3_Button' : ['3', 3, 1], '4_Button' : ['4', 4, 1], '6_Button' : ['6', 6, 1], 'WICKET_Button' : ['W', 0, 1]};
 
 function bindEvents() {
     document.getElementById('DOT_Button').addEventListener('click', dotButton);
@@ -25,15 +29,47 @@ function bindEvents() {
 }
 
 function updateStatus(buttonID) {
-    var statusButtons = ['firstStatusButton', 'secondStatusButton', 'thirdStatusButton', 'fourthStatusButton', 'fifthStatusButton', 'sixthStatusButton'];
-    // {button : [render, runIncrement, overIncrement]}
-    var correspondingActions = {'DOT_Button' : ['D', 0, 1], 'WIDE_Button' : ['W', 1, 0], 'NO_BALL_Button' : ['', 1, 0], '1_Button' : ['1', 1, 1], '2_Button' : ['2', 2, 1], '3_Button' : ['3', 3, 1], '4_Button' : ['4', 4, 1], '6_Button' : ['6', 6, 1], 'WICKET_Button' : ['W', 0, 1]};
-    i = i % 6;
-    document.getElementById(statusButtons[i]).innerText = correspondingActions[buttonID][0];
-    i += correspondingActions[buttonID][2];
-    console.log(i);
+    document.getElementById(statusButtons[overCounter % 6]).innerText = correspondingActions[buttonID][0];
+    runCountIncrement(buttonID);
+    overCountIncrement(buttonID);
+    printScore();
+    if(overCounter%6 == 0) {
+        resetButtons();
+    }
+}
+
+function runCountIncrement(buttonID) {
+    runCounter += correspondingActions[buttonID][1];
+    if(buttonID == 'WICKET_Button') {
+        wicketCounter++;
+    }
+}
+
+function overCountIncrement(buttonID) {
+    overCounter += correspondingActions[buttonID][2];
+}
+
+function printScore() {
+    // print runs/wickets
+    document.getElementById('runCount').innerText = runCounter + '/' + wicketCounter;
+
+    // print overs
+    document.getElementById('overCount').innerText = Math.floor(overCounter/6) + '.' + overCounter%6;
+}
+
+function resetButtons() {
+    console.log("Enter in reset button ", overCounter, overCounter%6);
+    for(let buttonID of statusButtons) {
+        document.getElementById(buttonID).innerText = '';
+    }
+}
+
+function readAllFields() {
 
 }
+
+
+
 
 function dotButton() {
     updateStatus('DOT_Button');
