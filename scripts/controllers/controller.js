@@ -6,13 +6,13 @@ function init() {
     bindEvents();
 }
 
-var overCounter = 0;
-var runCounter = 0;
-var wicketCounter = 0;
+var overCount = 0;
+var runCount = 0;
+var wicketCount = 0;
 var requiredRuns = 0;
 var requiredBalls = 0;
 var statusButtons = ['firstStatusButton', 'secondStatusButton', 'thirdStatusButton', 'fourthStatusButton', 'fifthStatusButton', 'sixthStatusButton'];
-// {button : [render, runIncrement, overIncrement]}
+// {buttonID : [render, runIncrement, overIncrement]}
 var correspondingActions = {'DOT_Button' : ['D', 0, 1], 'WIDE_Button' : ['WIDE', 1, 0], 'NO_BALL_Button' : ['NB', 1, 0], '1_Button' : ['1', 1, 1], '2_Button' : ['2', 2, 1], '3_Button' : ['3', 3, 1], '4_Button' : ['4', 4, 1], '6_Button' : ['6', 6, 1], 'WICKET_Button' : ['W', 0, 1]};
 
 function bindEvents() {
@@ -35,29 +35,55 @@ function bindEvents() {
 
 let flag = false;
 function updateStatus(buttonID) {
-    if(wicketCounter > 9)  return;
+    if(wicketCount > 9)  return;
     if(flag) {
         resetButtons();
         flag = false;
     }
-    document.getElementById(statusButtons[overCounter % 6]).innerText = correspondingActions[buttonID][0];
+    document.getElementById(statusButtons[overCount % 6]).innerText = correspondingActions[buttonID][0];
     runCountIncrement(buttonID);
     overCountIncrement(buttonID);
     printScore();
-    if(overCounter%6 == 0) {
+    if(overCount%6 == 0) {
         flag = true;
     }
+    addToScoreBoard(buttonID);
+}
+
+let extras = 0;
+function readAllFields(buttonID) {
+    if(buttonID == 'WIDE_Button' || buttonID == 'NO_BALL_Button') {
+        extras += 1;
+        return;
+    }
+    const runsObject = {};
+    runsObject['runCount'] = correspondingActions[buttonID][0];
+    runsObject['totalRunCount'] = runCount;
+    runsObject['wicketCount'] = document.getElementById('wicketCount').innerText;
+    runsObject['overCount'] = document.getElementById('overCount').innerText;
+    runsObject['totalBallCount'] = overCount;
+    runsObject['extras'] = extras;
+    runsObject['statusButtonID'] = statusButtons[(overCount%6)-1];
+    extras = 0;
+    return runsObject;
+}
+
+
+function addToScoreBoard(buttonID) {
+    const runsObject = readAllFields(buttonID);
+    if(runsObject) Service.addRuns(runsObject);
+
 }
 
 function runCountIncrement(buttonID) {
-    runCounter += correspondingActions[buttonID][1];
+    runCount += correspondingActions[buttonID][1];
     if(buttonID == 'WICKET_Button') {
-        wicketCounter++;
+        wicketCount++;
     }
 }
 
 function overCountIncrement(buttonID) {
-    overCounter += correspondingActions[buttonID][2];
+    overCount += correspondingActions[buttonID][2];
 }
 
 let flagSubmit = false;
@@ -82,8 +108,8 @@ function submitTarget() {
 function targetScoreCounter() {
     if(gameOver) return;
     
-    const runsLeft = requiredRuns - runCounter;
-    const ballsLeft = requiredBalls - overCounter; 
+    const runsLeft = requiredRuns - runCount;
+    const ballsLeft = requiredBalls - overCount; 
     
     // Update require-box with the values
     document.getElementById('requiredRuns').innerText = runsLeft;
@@ -96,7 +122,7 @@ function targetScoreCounter() {
         gameOver = true;
         flagSubmit = false;
     }
-    else if(wicketCounter > 9 || ballsLeft <= 0) {
+    else if(wicketCount > 9 || ballsLeft <= 0) {
         document.getElementById("requireBox").style.display = "none";
         document.getElementById('resultMessage').classList.add('show');
         document.getElementById('resultMessage').innerText = 'Alas !! You Lost 🥹😔';
@@ -113,10 +139,11 @@ function targetScoreCounter() {
 
 function printScore() {
     // print runs-wickets
-    document.getElementById('runCount').innerText = runCounter + '/' + wicketCounter;
+    document.getElementById('runCount').innerText = runCount + ' /'; 
+    document.getElementById('wicketCount').innerText = wicketCount;
 
     // print overs
-    document.getElementById('overCount').innerText = Math.floor(overCounter/6) + '.' + overCounter%6;
+    document.getElementById('overCount').innerText = Math.floor(overCount/6) + '.' + overCount%6;
     if(flagSubmit) targetScoreCounter();    
 }
 
@@ -127,12 +154,19 @@ function resetButtons() {
     }
 }
 
-function readAllFields() {
+
+
+function scoreboardButton() {
+    
 
 }
 
-function scoreboardButton() {
-
+function printScoreCard(scoreObject) {
+    const tbody = document.getElementById('scoreboard');
+    const tr = tbody.insertRow();
+    for(let key in scoreObject) {
+        //if(key == '')
+    }
 }
 
 
@@ -157,5 +191,12 @@ function closeRequireBox() {
 }
 
 function undoButton() {
+    let obj = Service.retrieveLastRecord();
+    document.getElementById(obj.statusButtonID).innerText = '';
+    Service.overs.pop();
+    obj = Service.retrieveLastRecord();
+    runCount = obj.totalRunCount;
+    overCount = obj.totalBallCount;
+    printScore();
 
 }

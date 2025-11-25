@@ -14,7 +14,10 @@
         </header>
         <main class="body">
             <div class="score">
-                <h1 id="runCount"></h1>
+                <h1>
+                    <span id="runCount"></span>
+                    <span id="wicketCount"></span>
+                </h1>
                 <h3 id="overCount"></h3>
                 <div id="requireBox" class="require-Box">
                     <span>Require</span>
@@ -56,6 +59,18 @@
                 <button id="Target_Mode_Button" class="operationButtons">Target Mode</button>
                 <button id="UNDO_Button" class="operationButtons">UNDO</button>
             </div>
+            <div class="popupScoreBoard" id="popupScoreBoard">
+                    <div class="popup-content">
+                       <table>
+                        <thead>
+                            <th>Over</th>
+                            <th>Score (Extras)</th>
+                        </thead>
+                            <tbody id="scoreboard">
+                            </tbody>
+                        </table> 
+                    </div>
+                </div>
         </main>
         <footer id="footer">
             <h6>Build By @ojas-03</h6>
