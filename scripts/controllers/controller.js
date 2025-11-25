@@ -35,6 +35,7 @@ function bindEvents() {
 
 let flag = false;
 function updateStatus(buttonID) {
+    if(wicketCounter > 9)  return;
     if(flag) {
         resetButtons();
         flag = false;
@@ -59,25 +60,66 @@ function overCountIncrement(buttonID) {
     overCounter += correspondingActions[buttonID][2];
 }
 
+let flagSubmit = false;
+let gameOver = false;
+function submitTarget() {
+    const runsInput = document.getElementById('runsInput');
+    const oversInput = document.getElementById('oversInput');
+    requiredRuns = parseInt(runsInput.value) || 0;
+    requiredBalls = parseInt(oversInput.value)*6 || 0;
+    flagSubmit = true;
+    gameOver = false;
+    document.getElementById('requireBox').style.display = 'flex';
+    document.getElementById('popupTarget').classList.remove('active');
+
+    // Clear inputs for next use
+    runsInput.value = '';
+    oversInput.value = '';
+    printScore();
+
+}
+
+function targetScoreCounter() {
+    if(gameOver) return;
+    
+    const runsLeft = requiredRuns - runCounter;
+    const ballsLeft = requiredBalls - overCounter; 
+    
+    // Update require-box with the values
+    document.getElementById('requiredRuns').innerText = runsLeft;
+    document.getElementById('requiredBalls').innerText = ballsLeft;
+    
+    if(runsLeft <= 0) {
+        document.getElementById("requireBox").style.display = "none";
+        document.getElementById('resultMessage').classList.add('show');
+        document.getElementById('resultMessage').innerText = 'Congratulations !! You Won 🎉🎊';
+        gameOver = true;
+        flagSubmit = false;
+    }
+    else if(wicketCounter > 9 || ballsLeft <= 0) {
+        document.getElementById("requireBox").style.display = "none";
+        document.getElementById('resultMessage').classList.add('show');
+        document.getElementById('resultMessage').innerText = 'Alas !! You Lost 🥹😔';
+        gameOver = true;
+        flagSubmit = false;
+    }
+    else {
+        document.getElementById('resultMessage').innerText = '';
+        document.getElementById('resultMessage').classList.remove('show');
+        document.getElementById("requireBox").style.display = "flex";
+        gameOver = false;
+    }
+}
+
 function printScore() {
     // print runs-wickets
     document.getElementById('runCount').innerText = runCounter + '/' + wicketCounter;
 
     // print overs
     document.getElementById('overCount').innerText = Math.floor(overCounter/6) + '.' + overCounter%6;
-
-    // Update require-box with the values
-    document.getElementById('requiredRuns').innerText = requiredRuns - runCounter;
-    document.getElementById('requiredBalls').innerText = requiredBalls - overCounter;
-
-    if(requiredRuns - runCounter < 0) {
-        document.getElementById('requireStatement').innerText = 'Congratulations !! You Won 🎉🎊';
-    }
-    if(requiredBalls - overCounter < 0) {
-        document.getElementById('requireStatement').innerText = 'Alas !! You Lost 🥹😔';
-    }
-    
+    if(flagSubmit) targetScoreCounter();    
 }
+
 
 function resetButtons() {
     for(let buttonID of statusButtons) {
@@ -107,31 +149,12 @@ function closePopup(event) {
     }
 }
 
-function submitTarget() {
-    const runsInput = document.getElementById('runsInput');
-    const oversInput = document.getElementById('oversInput');
-    requiredRuns = parseInt(runsInput.value) || 0;
-    requiredBalls = parseInt(oversInput.value)*6 || 0;
-    document.getElementById('requireBox').style.display = 'flex';
-    printScore();
-    if(requiredRuns - runCounter < 0) {
-        document.getElementById('requireStatement').innerText = 'Congratulations !! You Won 🎉🎊';
-    }
-    if(requiredBalls - overCounter < 0) {
-        document.getElementById('requireStatement').innerText = 'Alas !! You Lost 🥹😔';
-    }
-    document.getElementById('popupTarget').classList.remove('active');
-    
-    // Clear inputs for next use
-    runsInput.value = '';
-    oversInput.value = '';
-}
+
 
 function closeRequireBox() {
     document.getElementById("requireBox").style.display = "none";
+    document.getElementById("resultMessage").style.display = "none";
 }
-
-
 
 function undoButton() {
 
