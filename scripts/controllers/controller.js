@@ -4,6 +4,7 @@ window.addEventListener('load', init);
 
 function init() {
     bindEvents();
+    printScore();
 }
 
 var overCount = 0;
@@ -28,6 +29,7 @@ function bindEvents() {
     document.getElementById('Scoreboard_Button').addEventListener('click', scoreboardButton);
     document.getElementById('Target_Mode_Button').addEventListener('click', targetButton);
     document.getElementById('popupTarget').addEventListener('click', closePopup);
+    document.getElementById('popupScoreBoard').addEventListener('click', closePopup);
     document.getElementById('submitTarget').addEventListener('click', submitTarget);
     document.getElementById('closeRequireBox').addEventListener('click', closeRequireBox);
     document.getElementById('UNDO_Button').addEventListener('click', undoButton);
@@ -48,6 +50,7 @@ function updateStatus(buttonID) {
         flag = true;
     }
     addToScoreBoard(buttonID);
+    printScoreCard();
 }
 
 let extras = 0;
@@ -63,7 +66,8 @@ function readAllFields(buttonID) {
     runsObject['overCount'] = document.getElementById('overCount').innerText;
     runsObject['totalBallCount'] = overCount;
     runsObject['extras'] = extras;
-    runsObject['statusButtonID'] = statusButtons[(overCount%6)-1];
+    if(overCount%6 == 0) runsObject['statusButtonID'] = statusButtons[5];
+    else runsObject['statusButtonID'] = statusButtons[(overCount%6)-1];
     extras = 0;
     return runsObject;
 }
@@ -155,17 +159,38 @@ function resetButtons() {
 }
 
 
-
 function scoreboardButton() {
-    
-
+    const popup = document.getElementById('popupScoreBoard');
+    popup.classList.add('active');
+    printScoreCard();
 }
 
-function printScoreCard(scoreObject) {
+function printScoreCard() {
     const tbody = document.getElementById('scoreboard');
-    const tr = tbody.insertRow();
-    for(let key in scoreObject) {
-        //if(key == '')
+    if(!tbody) return;
+    tbody.innerHTML = ''; // Clear existing rows
+    
+    const oversData = Service.overs;
+    
+    for(let i = 0; i < oversData.length; i++) {
+        const obj = oversData[i];
+        const tr = tbody.insertRow();
+        
+        // Over
+        const tdOver = tr.insertCell();
+        tdOver.innerText = obj.overCount;
+        
+        // Runs
+        const tdRuns = tr.insertCell();
+        tdRuns.innerText = obj.runCount;
+        
+        // Extras
+        const tdExtras = tr.insertCell();
+        tdExtras.innerText = obj.extras;
+        
+        // Total Score
+        const tdTotal = tr.insertCell();
+        tdTotal.innerText = `${obj.totalRunCount}/${obj.wicketCount}`;
     }
 }
 
@@ -177,9 +202,11 @@ function targetButton() {
 
 function closePopup(event) {
     // Only close if clicking on the background overlay, not the popup content
-    console.log("close");
     if (event.target.id === 'popupTarget') {
         document.getElementById('popupTarget').classList.remove('active');
+    }
+    if (event.target.id === 'popupScoreBoard') {
+        document.getElementById('popupScoreBoard').classList.remove('active');
     }
 }
 
@@ -196,7 +223,12 @@ function undoButton() {
     Service.overs.pop();
     obj = Service.retrieveLastRecord();
     runCount = obj.totalRunCount;
+    wicketCount = obj.wicketCount;
     overCount = obj.totalBallCount;
+    while(obj.overCount%6 != 1) {
+        document.getElementById(obj.statusButtonID).innerText = obj.runCount;
+        
+    }
     printScore();
 
 }

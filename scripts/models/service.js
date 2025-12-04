@@ -11,7 +11,13 @@ export const Service = {
         return runs;
     },
 
+    statusButtonsReset() {
+        //
+    },
+    
     retrieveLastRecord() {
+        console.log("Last record", this.overs);
         return this.overs[this.overs.length - 1];
+        
     }
 }
