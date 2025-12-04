@@ -42,6 +42,9 @@ function updateStatus(buttonID) {
         resetButtons();
         flag = false;
     }
+    if(overCount>=5 && overCount%6==0) {
+        for(let i of statusButtons)  document.getElementById(i).innerText = '';
+    }
     document.getElementById(statusButtons[overCount % 6]).innerText = correspondingActions[buttonID][0];
     runCountIncrement(buttonID);
     overCountIncrement(buttonID);
@@ -219,16 +222,27 @@ function closeRequireBox() {
 
 function undoButton() {
     let obj = Service.retrieveLastRecord();
-    document.getElementById(obj.statusButtonID).innerText = '';
-    Service.overs.pop();
-    obj = Service.retrieveLastRecord();
-    runCount = obj.totalRunCount;
-    wicketCount = obj.wicketCount;
-    overCount = obj.totalBallCount;
-    while(obj.overCount%6 != 1) {
-        document.getElementById(obj.statusButtonID).innerText = obj.runCount;
-        
+    if(obj) {
+        document.getElementById(obj.statusButtonID).innerText = '';
+        Service.overs.pop();
+        obj = Service.retrieveLastRecord();
+        if(obj) {
+            runCount = obj.totalRunCount;
+            wicketCount = obj.wicketCount;
+            overCount = obj.totalBallCount;
+            printScore();
+            let resetArray = Service.statusButtonsReset();
+            console.log(resetArray);
+            for(let ele of resetArray) {
+                document.getElementById(ele.statusButtonID).innerText = ele.runCount;
+            }
+        }
+        else {
+            runCount = 0;
+            wicketCount = 0;
+            overCount = 0;
+            printScore();
+        }
     }
-    printScore();
 
 }
