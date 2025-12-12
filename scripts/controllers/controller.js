@@ -125,6 +125,7 @@ function targetScoreCounter() {
     if(runsLeft <= 0) {
         document.getElementById("requireBox").style.display = "none";
         document.getElementById('resultMessage').classList.add('show');
+        document.getElementById('resultMessage').style.display = "flex";
         document.getElementById('resultMessage').innerText = 'Congratulations !! You Won 🎉🎊';
         gameOver = true;
         flagSubmit = false;
@@ -132,6 +133,7 @@ function targetScoreCounter() {
     else if(wicketCount > 9 || ballsLeft <= 0) {
         document.getElementById("requireBox").style.display = "none";
         document.getElementById('resultMessage').classList.add('show');
+        document.getElementById('resultMessage').style.display = "flex";
         document.getElementById('resultMessage').innerText = 'Alas !! You Lost 🥹😔';
         gameOver = true;
         flagSubmit = false;
@@ -139,6 +141,7 @@ function targetScoreCounter() {
     else {
         document.getElementById('resultMessage').innerText = '';
         document.getElementById('resultMessage').classList.remove('show');
+        document.getElementById('resultMessage').style.display = "none";
         document.getElementById("requireBox").style.display = "flex";
         gameOver = false;
     }
@@ -171,7 +174,7 @@ function scoreboardButton() {
 function printScoreCard() {
     const tbody = document.getElementById('scoreboard');
     if(!tbody) return;
-    tbody.innerHTML = ''; // Clear existing rows
+    tbody.innerText = ''; // Clear existing rows
     
     const oversData = Service.overs;
     
@@ -218,6 +221,7 @@ function closePopup(event) {
 function closeRequireBox() {
     document.getElementById("requireBox").style.display = "none";
     document.getElementById("resultMessage").style.display = "none";
+    flagSubmit = false;
 }
 
 function undoButton() {
